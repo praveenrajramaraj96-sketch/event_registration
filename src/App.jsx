@@ -3,7 +3,9 @@ import { Users, ClipboardList, Plus, Play, CheckCircle, Trophy, Trash2, Award } 
 import './index.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('registration');
+  const searchParams = new URLSearchParams(window.location.search);
+  const isLeaderboardOnly = searchParams.get('view') === 'leaderboard';
+  const [activeTab, setActiveTab] = useState(isLeaderboardOnly ? 'leaderboard' : 'registration');
   const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: '301' });
   const [filterClass, setFilterClass] = useState('301');
 
@@ -89,26 +91,28 @@ function App() {
         <p className="subtitle">Manage registrations and evaluations seamlessly</p>
       </header>
 
-      <div className="tabs">
-        <button 
-          className={`tab-btn ${activeTab === 'registration' ? 'active' : ''}`}
-          onClick={() => setActiveTab('registration')}
-        >
-          <Users size={18} /> Phase 1: Registration
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('evaluation')}
-        >
-          <ClipboardList size={18} /> Phase 2: Evaluation
-        </button>
-        <button 
-          className={`tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('leaderboard')}
-        >
-          <Award size={18} /> Phase 3: Leaderboard
-        </button>
-      </div>
+      {!isLeaderboardOnly && (
+        <div className="tabs">
+          <button 
+            className={`tab-btn ${activeTab === 'registration' ? 'active' : ''}`}
+            onClick={() => setActiveTab('registration')}
+          >
+            <Users size={18} /> Phase 1: Registration
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
+            onClick={() => setActiveTab('evaluation')}
+          >
+            <ClipboardList size={18} /> Phase 2: Evaluation
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('leaderboard')}
+          >
+            <Award size={18} /> Phase 3: Leaderboard
+          </button>
+        </div>
+      )}
 
       {activeTab === 'registration' && (
         <div className="glass-card">
