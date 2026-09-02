@@ -1,11 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, ClipboardList, Plus, Play, CheckCircle, Trophy, Trash2, Award } from 'lucide-react';
 import './index.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('registration');
-  const [teams, setTeams] = useState([]);
   const [formData, setFormData] = useState({ teamName: '', leaderName: '' });
+
+  // Initialize state from local storage if it exists
+  const [teams, setTeams] = useState(() => {
+    const savedTeams = localStorage.getItem('hackathon_teams');
+    if (savedTeams) {
+      try {
+        return JSON.parse(savedTeams);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // Save to local storage whenever teams change
+  useEffect(() => {
+    localStorage.setItem('hackathon_teams', JSON.stringify(teams));
+  }, [teams]);
 
   // Handle Registration
   const handleRegister = (e) => {
