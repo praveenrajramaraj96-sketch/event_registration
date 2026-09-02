@@ -4,7 +4,8 @@ import './index.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('registration');
-  const [formData, setFormData] = useState({ teamName: '', leaderName: '' });
+  const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: 'Class 1' });
+  const [filterClass, setFilterClass] = useState('All');
 
   const [teams, setTeams] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -42,12 +43,13 @@ function App() {
       priority: teams.length + 1,
       teamName: formData.teamName,
       leaderName: formData.leaderName,
+      roomClass: formData.roomClass,
       status: 'pending', // pending, presenting, completed
       marks: null,
     };
 
     setTeams([...teams, newTeam]);
-    setFormData({ teamName: '', leaderName: '' });
+    setFormData({ teamName: '', leaderName: '', roomClass: 'Class 1' });
     // Optional: Auto switch to evaluation or show success
   };
 
@@ -133,6 +135,19 @@ function App() {
                 required
               />
             </div>
+            <div className="form-group">
+              <label>Class / Room</label>
+              <select 
+                className="form-input" 
+                value={formData.roomClass}
+                onChange={(e) => setFormData({ ...formData, roomClass: e.target.value })}
+              >
+                <option value="Class 1">Class 1</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 3">Class 3</option>
+                <option value="Class 4">Class 4</option>
+              </select>
+            </div>
             <button type="submit" className="btn-primary">
               Register Team
             </button>
@@ -142,9 +157,23 @@ function App() {
 
       {activeTab === 'evaluation' && (
         <div className="glass-card">
-          <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ClipboardList size={24} color="var(--primary)" /> Evaluation Queue
-          </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+              <ClipboardList size={24} color="var(--primary)" /> Evaluation Queue
+            </h2>
+            <select 
+              className="form-input" 
+              style={{ width: 'auto', padding: '0.5rem 1rem' }}
+              value={filterClass}
+              onChange={(e) => setFilterClass(e.target.value)}
+            >
+              <option value="All">All Classes</option>
+              <option value="Class 1">Class 1</option>
+              <option value="Class 2">Class 2</option>
+              <option value="Class 3">Class 3</option>
+              <option value="Class 4">Class 4</option>
+            </select>
+          </div>
           
           {teams.length === 0 ? (
             <div className="empty-state">
@@ -153,7 +182,10 @@ function App() {
             </div>
           ) : (
             <div className="team-list">
-              {teams.sort((a, b) => a.priority - b.priority).map((team) => (
+              {teams
+                .filter(team => filterClass === 'All' || team.roomClass === filterClass)
+                .sort((a, b) => a.priority - b.priority)
+                .map((team) => (
                 <TeamCard 
                   key={team.id} 
                   team={team} 
@@ -161,6 +193,9 @@ function App() {
                   onSubmitMarks={(marks) => submitMarks(team.id, marks)}
                 />
               ))}
+              {teams.filter(team => filterClass === 'All' || team.roomClass === filterClass).length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No teams in {filterClass}.</p>
+              )}
             </div>
           )}
         </div>
@@ -246,6 +281,9 @@ function TeamCard({ team, onCall, onSubmitMarks }) {
           {team.teamName}
           <span className={`badge badge-${team.status}`}>
             {team.status}
+          </span>
+          <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>
+            ({team.roomClass || 'Class 1'})
           </span>
         </h3>
         <p>Leader: {team.leaderName}</p>
