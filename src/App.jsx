@@ -4,7 +4,7 @@ import './index.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('registration');
-  const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: 'Class 1' });
+  const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: '301' });
   const [filterClass, setFilterClass] = useState('All');
 
   const [teams, setTeams] = useState([]);
@@ -49,7 +49,7 @@ function App() {
     };
 
     setTeams([...teams, newTeam]);
-    setFormData({ teamName: '', leaderName: '', roomClass: 'Class 1' });
+    setFormData({ teamName: '', leaderName: '', roomClass: '301' });
     // Optional: Auto switch to evaluation or show success
   };
 
@@ -142,10 +142,10 @@ function App() {
                 value={formData.roomClass}
                 onChange={(e) => setFormData({ ...formData, roomClass: e.target.value })}
               >
-                <option value="Class 1">Class 1</option>
-                <option value="Class 2">Class 2</option>
-                <option value="Class 3">Class 3</option>
-                <option value="Class 4">Class 4</option>
+                <option value="301">301</option>
+                <option value="302">302</option>
+                <option value="303">303</option>
+                <option value="304">304</option>
               </select>
             </div>
             <button type="submit" className="btn-primary">
@@ -168,10 +168,10 @@ function App() {
               onChange={(e) => setFilterClass(e.target.value)}
             >
               <option value="All">All Classes</option>
-              <option value="Class 1">Class 1</option>
-              <option value="Class 2">Class 2</option>
-              <option value="Class 3">Class 3</option>
-              <option value="Class 4">Class 4</option>
+              <option value="301">301</option>
+              <option value="302">302</option>
+              <option value="303">303</option>
+              <option value="304">304</option>
             </select>
           </div>
           
@@ -283,7 +283,7 @@ function TeamCard({ team, onCall, onSubmitMarks }) {
             {team.status}
           </span>
           <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>
-            ({team.roomClass || 'Class 1'})
+            ({team.roomClass || '301'})
           </span>
         </h3>
         <p>Leader: {team.leaderName}</p>
