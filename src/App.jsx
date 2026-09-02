@@ -6,23 +6,31 @@ function App() {
   const [activeTab, setActiveTab] = useState('registration');
   const [formData, setFormData] = useState({ teamName: '', leaderName: '' });
 
-  // Initialize state from local storage if it exists
-  const [teams, setTeams] = useState(() => {
-    const savedTeams = localStorage.getItem('hackathon_teams');
-    if (savedTeams) {
-      try {
-        return JSON.parse(savedTeams);
-      } catch (e) {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [teams, setTeams] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Save to local storage whenever teams change
+  // Load from Cloud Database on mount
   useEffect(() => {
-    localStorage.setItem('hackathon_teams', JSON.stringify(teams));
-  }, [teams]);
+    fetch('https://api.restful-api.dev/objects/ff808181a061cdc401a0630d5ba10522')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.data && data.data.teams) {
+          setTeams(data.data.teams);
+        }
+        setIsLoaded(true);
+      })
+      .catch(() => setIsLoaded(true));
+  }, []);
+
+  // Save to Cloud Database whenever teams change
+  useEffect(() => {
+    if (!isLoaded) return;
+    fetch('https://api.restful-api.dev/objects/ff808181a061cdc401a0630d5ba10522', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'hackathon_teams_2026', data: { teams } })
+    });
+  }, [teams, isLoaded]);
 
   // Handle Registration
   const handleRegister = (e) => {
