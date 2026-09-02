@@ -49,6 +49,9 @@ function App() {
     };
 
     setTeams([...teams, newTeam]);
+    
+    window.alert(`Successfully registered team: ${formData.teamName} for Room ${formData.roomClass}!\nTheir priority number is #${teams.length + 1}.`);
+    
     setFormData({ teamName: '', leaderName: '', roomClass: '301' });
     // Optional: Auto switch to evaluation or show success
   };
