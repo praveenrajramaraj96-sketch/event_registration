@@ -9,31 +9,23 @@ function App() {
   const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: '301' });
   const [filterClass, setFilterClass] = useState('301');
 
-  const [teams, setTeams] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  // Initialize state from local storage if it exists
+  const [teams, setTeams] = useState(() => {
+    const savedTeams = localStorage.getItem('hackathon_teams');
+    if (savedTeams) {
+      try {
+        return JSON.parse(savedTeams);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
 
-  // Load from Cloud Database on mount
+  // Save to local storage whenever teams change
   useEffect(() => {
-    fetch('https://api.restful-api.dev/objects/ff808181a061cdc401a0630d5ba10522')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.data && data.data.teams) {
-          setTeams(data.data.teams);
-        }
-        setIsLoaded(true);
-      })
-      .catch(() => setIsLoaded(true));
-  }, []);
-
-  // Save to Cloud Database whenever teams change
-  useEffect(() => {
-    if (!isLoaded) return;
-    fetch('https://api.restful-api.dev/objects/ff808181a061cdc401a0630d5ba10522', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'hackathon_teams_2026', data: { teams } })
-    });
-  }, [teams, isLoaded]);
+    localStorage.setItem('hackathon_teams', JSON.stringify(teams));
+  }, [teams]);
 
   // Handle Registration
   const handleRegister = (e) => {
