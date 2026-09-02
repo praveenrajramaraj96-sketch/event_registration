@@ -329,3 +329,39 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
   opacity: 0.5;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 1rem;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  
+  .tab-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .glass-card {
+    padding: 1.5rem;
+  }
+  
+  .team-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  
+  .team-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .title-glow {
+    font-size: 2rem;
+  }
+}

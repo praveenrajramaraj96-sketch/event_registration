@@ -234,7 +234,7 @@ function TeamCard({ team, onCall, onSubmitMarks }) {
         )}
 
         {team.status === 'presenting' && (
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
               <input 
                 type="number" 
