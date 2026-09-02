@@ -8,8 +8,8 @@ function App() {
   const searchParams = new URLSearchParams(window.location.search);
   const isLeaderboardOnly = searchParams.get('view') === 'leaderboard';
   const [activeTab, setActiveTab] = useState(isLeaderboardOnly ? 'leaderboard' : 'registration');
-  const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: '301' });
-  const [filterClass, setFilterClass] = useState('301');
+  const [globalRoom, setGlobalRoom] = useState(null);
+  const [formData, setFormData] = useState({ teamName: '', leaderName: '' });
 
   const [teams, setTeams] = useState([]);
   
@@ -37,7 +37,7 @@ function App() {
       priority: teams.length + 1,
       teamName: formData.teamName,
       leaderName: formData.leaderName,
-      roomClass: formData.roomClass,
+      roomClass: globalRoom,
       status: 'pending',
       marks: null,
     };
@@ -45,9 +45,9 @@ function App() {
     // Save to Firestore
     await setDoc(doc(db, 'teams', newTeamId), newTeam);
     
-    window.alert(`Successfully registered team: ${formData.teamName} for Room ${formData.roomClass}!\nTheir priority number is #${teams.length + 1}.`);
+    window.alert(`Successfully registered team: ${formData.teamName} for Room ${globalRoom}!\nTheir priority number is #${teams.length + 1}.`);
     
-    setFormData({ teamName: '', leaderName: '', roomClass: '301' });
+    setFormData({ teamName: '', leaderName: '' });
   };
 
   // Handle Calling Team
@@ -79,6 +79,23 @@ function App() {
       setActiveTab('registration');
     }
   };
+
+  if (!isLeaderboardOnly && !globalRoom) {
+    return (
+      <div className="app-container">
+        <header className="header">
+          <h1 className="title-glow">Select Your Room</h1>
+          <p className="subtitle">Choose the room you are managing for this session</p>
+        </header>
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '400px', margin: '0 auto' }}>
+          <button className="btn-primary" onClick={() => setGlobalRoom('301')}>Room 301</button>
+          <button className="btn-primary" onClick={() => setGlobalRoom('302')}>Room 302</button>
+          <button className="btn-primary" onClick={() => setGlobalRoom('303')}>Room 303</button>
+          <button className="btn-primary" onClick={() => setGlobalRoom('304')}>Room 304</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
@@ -138,19 +155,6 @@ function App() {
                 required
               />
             </div>
-            <div className="form-group">
-              <label>Class / Room</label>
-              <select 
-                className="form-input" 
-                value={formData.roomClass}
-                onChange={(e) => setFormData({ ...formData, roomClass: e.target.value })}
-              >
-                <option value="301">301</option>
-                <option value="302">302</option>
-                <option value="303">303</option>
-                <option value="304">304</option>
-              </select>
-            </div>
             <button type="submit" className="btn-primary">
               Register Team
             </button>
@@ -162,19 +166,8 @@ function App() {
         <div className="glass-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-              <ClipboardList size={24} color="var(--primary)" /> Evaluation Queue
+              <ClipboardList size={24} color="var(--primary)" /> Evaluation Queue (Room {globalRoom})
             </h2>
-            <select 
-              className="form-input" 
-              style={{ width: 'auto', padding: '0.5rem 1rem' }}
-              value={filterClass}
-              onChange={(e) => setFilterClass(e.target.value)}
-            >
-              <option value="301">301</option>
-              <option value="302">302</option>
-              <option value="303">303</option>
-              <option value="304">304</option>
-            </select>
           </div>
           
           {teams.length === 0 ? (
@@ -185,7 +178,7 @@ function App() {
           ) : (
             <div className="team-list">
               {teams
-                .filter(team => team.roomClass === filterClass)
+                .filter(team => team.roomClass === globalRoom)
                 .sort((a, b) => a.priority - b.priority)
                 .map((team) => (
                 <TeamCard 
@@ -195,8 +188,8 @@ function App() {
                   onSubmitMarks={(marks) => submitMarks(team.id, marks)}
                 />
               ))}
-              {teams.filter(team => team.roomClass === filterClass).length === 0 && (
-                <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No teams in {filterClass}.</p>
+              {teams.filter(team => team.roomClass === globalRoom).length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No teams in {globalRoom}.</p>
               )}
             </div>
           )}
