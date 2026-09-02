@@ -5,7 +5,7 @@ import './index.css';
 function App() {
   const [activeTab, setActiveTab] = useState('registration');
   const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: '301' });
-  const [filterClass, setFilterClass] = useState('All');
+  const [filterClass, setFilterClass] = useState('301');
 
   const [teams, setTeams] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -167,7 +167,6 @@ function App() {
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
             >
-              <option value="All">All Classes</option>
               <option value="301">301</option>
               <option value="302">302</option>
               <option value="303">303</option>
@@ -183,7 +182,7 @@ function App() {
           ) : (
             <div className="team-list">
               {teams
-                .filter(team => filterClass === 'All' || team.roomClass === filterClass)
+                .filter(team => team.roomClass === filterClass)
                 .sort((a, b) => a.priority - b.priority)
                 .map((team) => (
                 <TeamCard 
@@ -193,7 +192,7 @@ function App() {
                   onSubmitMarks={(marks) => submitMarks(team.id, marks)}
                 />
               ))}
-              {teams.filter(team => filterClass === 'All' || team.roomClass === filterClass).length === 0 && (
+              {teams.filter(team => team.roomClass === filterClass).length === 0 && (
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No teams in {filterClass}.</p>
               )}
             </div>
