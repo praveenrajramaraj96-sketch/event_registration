@@ -9,7 +9,13 @@ function App() {
   const isLeaderboardOnly = searchParams.get('view') === 'leaderboard';
   const [activeTab, setActiveTab] = useState(isLeaderboardOnly ? 'leaderboard' : 'registration');
   const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: '301' });
-  const [filterClass, setFilterClass] = useState('301');
+  const [filterClass, setFilterClass] = useState(() => {
+    return localStorage.getItem('judge_room_selection') || '301';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('judge_room_selection', filterClass);
+  }, [filterClass]);
 
   const [teams, setTeams] = useState([]);
   
