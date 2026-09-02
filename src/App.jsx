@@ -9,23 +9,41 @@ function App() {
   const [formData, setFormData] = useState({ teamName: '', leaderName: '', roomClass: '301' });
   const [filterClass, setFilterClass] = useState('301');
 
-  // Initialize state from local storage if it exists
-  const [teams, setTeams] = useState(() => {
-    const savedTeams = localStorage.getItem('hackathon_teams');
-    if (savedTeams) {
-      try {
-        return JSON.parse(savedTeams);
-      } catch (e) {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [teams, setTeams] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const API_URL = 'https://extendsclass.com/api/json-storage/bin/abdbadc';
 
-  // Save to local storage whenever teams change
+  // Load from Cloud Database on mount and poll every 10 seconds
   useEffect(() => {
-    localStorage.setItem('hackathon_teams', JSON.stringify(teams));
-  }, [teams]);
+    const fetchTeams = () => {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setTeams(data);
+          }
+          setIsLoaded(true);
+        })
+        .catch(err => {
+          console.error("Cloud sync failed:", err);
+          setIsLoaded(true);
+        });
+    };
+    
+    fetchTeams();
+    const interval = setInterval(fetchTeams, 10000); // Polling for live updates!
+    return () => clearInterval(interval);
+  }, []);
+
+  // Save to Cloud Database whenever teams change locally
+  useEffect(() => {
+    if (!isLoaded) return;
+    fetch(API_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(teams)
+    }).catch(console.error);
+  }, [teams, isLoaded]);
 
   // Handle Registration
   const handleRegister = (e) => {
