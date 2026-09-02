@@ -246,16 +246,18 @@ function App() {
       )}
       
       {/* Hidden Admin Clear Data Button */}
-      <div style={{ textAlign: 'center', marginTop: '4rem', opacity: 0.1, transition: 'opacity 0.3s' }} 
-           onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-           onMouseLeave={(e) => e.currentTarget.style.opacity = '0.1'}>
-        <button 
-          onClick={handleClearData}
-          style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', margin: '0 auto' }}
-        >
-          <Trash2 size={12} /> Admin: Reset System
-        </button>
-      </div>
+      {activeTab !== 'leaderboard' && (
+        <div style={{ textAlign: 'center', marginTop: '4rem', opacity: 0.1, transition: 'opacity 0.3s' }} 
+             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.1'}>
+          <button 
+            onClick={handleClearData}
+            style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', margin: '0 auto' }}
+          >
+            <Trash2 size={12} /> Admin: Reset System
+          </button>
+        </div>
+      )}
     </div>
   );
 }
