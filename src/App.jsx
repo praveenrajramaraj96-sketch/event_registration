@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Users, ClipboardList, Plus, Play, CheckCircle, Trophy, Trash2, Award } from 'lucide-react';
 import './index.css';
+import { db } from './firebase';
+import { collection, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 
 function App() {
   const searchParams = new URLSearchParams(window.location.search);
@@ -10,86 +12,70 @@ function App() {
   const [filterClass, setFilterClass] = useState('301');
 
   const [teams, setTeams] = useState([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const API_URL = 'https://extendsclass.com/api/json-storage/bin/abdbadc';
-
-  // Load from Cloud Database on mount and poll every 10 seconds
+  
+  // Real-time listener for Firestore
   useEffect(() => {
-    const fetchTeams = () => {
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setTeams(data);
-          }
-          setIsLoaded(true);
-        })
-        .catch(err => {
-          console.error("Cloud sync failed:", err);
-          setIsLoaded(true);
-        });
-    };
+    const unsubscribe = onSnapshot(collection(db, 'teams'), (snapshot) => {
+      const teamsData = [];
+      snapshot.forEach((doc) => {
+        teamsData.push(doc.data());
+      });
+      setTeams(teamsData);
+    });
     
-    fetchTeams();
-    const interval = setInterval(fetchTeams, 10000); // Polling for live updates!
-    return () => clearInterval(interval);
+    return () => unsubscribe();
   }, []);
 
-  // Save to Cloud Database whenever teams change locally
-  useEffect(() => {
-    if (!isLoaded) return;
-    fetch(API_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(teams)
-    }).catch(console.error);
-  }, [teams, isLoaded]);
-
   // Handle Registration
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     if (!formData.teamName || !formData.leaderName) return;
 
+    const newTeamId = Date.now().toString();
     const newTeam = {
-      id: Date.now(),
+      id: newTeamId,
       priority: teams.length + 1,
       teamName: formData.teamName,
       leaderName: formData.leaderName,
       roomClass: formData.roomClass,
-      status: 'pending', // pending, presenting, completed
+      status: 'pending',
       marks: null,
     };
 
-    setTeams([...teams, newTeam]);
+    // Save to Firestore
+    await setDoc(doc(db, 'teams', newTeamId), newTeam);
     
     window.alert(`Successfully registered team: ${formData.teamName} for Room ${formData.roomClass}!\nTheir priority number is #${teams.length + 1}.`);
     
     setFormData({ teamName: '', leaderName: '', roomClass: '301' });
-    // Optional: Auto switch to evaluation or show success
   };
 
   // Handle Calling Team
-  const callTeam = (id) => {
-    setTeams(teams.map(team => 
-      team.id === id ? { ...team, status: 'presenting' } : team
-    ));
+  const callTeam = async (id) => {
+    const team = teams.find(t => t.id === id || t.id === id.toString());
+    if (team) {
+      await setDoc(doc(db, 'teams', team.id.toString()), { ...team, status: 'presenting' });
+    }
   };
 
   // Handle Mark Submission
-  const submitMarks = (id, detailedMarks) => {
+  const submitMarks = async (id, detailedMarks) => {
     if (!detailedMarks.priority || !detailedMarks.presentation || !detailedMarks.proportion) return;
     
     const totalMarks = Number(detailedMarks.priority) + Number(detailedMarks.presentation) + Number(detailedMarks.proportion);
+    const team = teams.find(t => t.id === id || t.id === id.toString());
     
-    setTeams(teams.map(team => 
-      team.id === id ? { ...team, status: 'completed', marks: totalMarks, detailedMarks } : team
-    ));
+    if (team) {
+      await setDoc(doc(db, 'teams', team.id.toString()), { ...team, status: 'completed', marks: totalMarks, detailedMarks });
+    }
   };
 
-  const handleClearData = () => {
+  const handleClearData = async () => {
     if (window.confirm("Are you sure you want to clear all registered teams and evaluation data?")) {
-      setTeams([]);
-      setFormData({ teamName: '', leaderName: '' });
+      for (const team of teams) {
+        await deleteDoc(doc(db, 'teams', team.id.toString()));
+      }
+      setFormData({ teamName: '', leaderName: '', roomClass: '301' });
       setActiveTab('registration');
     }
   };
